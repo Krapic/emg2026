@@ -84,6 +84,7 @@ Provjera novog modela uživo s opremom i demonstracija bez dinamometra ostaju ot
 
 ## Gdje je što
 
+- [PROVJERA_U_LABORATORIJU.md](PROVJERA_U_LABORATORIJU.md) — kontrolni popis za termin s opremom: što provjeriti i kada je korak prošao.
 - [POKRETANJE.md](POKRETANJE.md) — pokretanje, Bluetooth i dijagnostika.
 - [SNIMANJE_I_MODEL.md](SNIMANJE_I_MODEL.md) — MVC, snimanje, treniranje, učitavanje i identifikatori snimki.
 - [PLAN_RADA.md](PLAN_RADA.md) — stanje implementacije, preostali koraci i radovi za predikciju.

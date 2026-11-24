@@ -41,6 +41,7 @@ python3 scripts/analiza.py evaluate           # pogreška modela po razinama sil
 ## Upute
 
 - [KRENI_OVDJE.md](KRENI_OVDJE.md) — instalacija, što se može bez senzora i redoslijed rada s opremom.
+- [PROVJERA_U_LABORATORIJU.md](PROVJERA_U_LABORATORIJU.md) — kontrolni popis za termin s opremom.
 - [POKRETANJE.md](POKRETANJE.md) — pokretanje, Bluetooth i dijagnostika.
 - [SNIMANJE_I_MODEL.md](SNIMANJE_I_MODEL.md) — maksimalni stisak, snimanje, treniranje i učitavanje modela.
 - [PLAN_RADA.md](PLAN_RADA.md) — stanje implementacije i preostali koraci.
