@@ -1,0 +1,7 @@
+# Skripte se izvode na Ubuntuu, pa tekst ostaje s LF i nakon kloniranja na Windowsu.
+* text=auto eol=lf
+
+# Snimke i binarne datoteke ostaju bajt po bajt kakve jesu.
+*.csv -text
+diagnostics/**/*.cfg -text
+*.docx binary

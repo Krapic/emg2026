@@ -1,0 +1,86 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root>
+ <tabbed_widget name="Main Window" parent="main_window">
+  <Tab containers="1" tab_name="4 Shimmera + dinamometar">
+   <Container>
+    <DockSplitter sizes="1;1;1;1;1" count="5" orientation="-">
+     <DockArea name="Shimmer 1 - 4C91 - EMG [mV]">
+      <plot style="Lines" mode="TimeSeries" flip_x="false" flip_y="false">
+       <range left="0" right="10" bottom="-20" top="20" />
+       <limitY />
+       <curve name="/shimmer1/emg_stream/emg_ch1" color="#1f77b4" />
+      </plot>
+     </DockArea>
+     <DockArea name="Shimmer 2 - 9D2C - EMG [mV]">
+      <plot style="Lines" mode="TimeSeries" flip_x="false" flip_y="false">
+       <range left="0" right="10" bottom="-20" top="20" />
+       <limitY />
+       <curve name="/shimmer2/emg_stream/emg_ch1" color="#1f77b4" />
+      </plot>
+     </DockArea>
+     <DockArea name="Shimmer 3 - 4C87 - EMG [mV]">
+      <plot style="Lines" mode="TimeSeries" flip_x="false" flip_y="false">
+       <range left="0" right="10" bottom="-20" top="20" />
+       <limitY />
+       <curve name="/shimmer3/emg_stream/emg_ch1" color="#1f77b4" />
+      </plot>
+     </DockArea>
+     <DockArea name="Shimmer 4 - 9D23 - EMG [mV]">
+      <plot style="Lines" mode="TimeSeries" flip_x="false" flip_y="false">
+       <range left="0" right="10" bottom="-20" top="20" />
+       <limitY />
+       <curve name="/shimmer4/emg_stream/emg_ch1" color="#1f77b4" />
+      </plot>
+     </DockArea>
+     <DockArea name="Sila stiska [N]">
+      <plot style="Lines" mode="TimeSeries" flip_x="false" flip_y="false">
+       <range left="0" right="10" bottom="-5" top="100" />
+       <limitY />
+       <curve name="/grip_force_stream/grip_force" color="#2ca02c" />
+      </plot>
+     </DockArea>
+    </DockSplitter>
+   </Container>
+  </Tab>
+  <currentTabIndex index="0" />
+ </tabbed_widget>
+ <use_relative_time_offset enabled="1" />
+ <Plugins>
+  <plugin ID="DataLoad CSV">
+   <parameters delimiter="0" time_axis="" />
+  </plugin>
+  <plugin ID="DataLoad MCAP" />
+  <plugin ID="DataLoad ROS2 bags">
+   <use_header_stamp value="false" />
+   <discard_large_arrays value="true" />
+   <max_array_size value="100" />
+   <boolean_strings_to_number value="true" />
+   <remove_suffix_from_strings value="true" />
+   <selected_topics value="" />
+  </plugin>
+  <plugin ID="DataLoad ULog" />
+  <plugin ID="ROS2 Topic Subscriber">
+   <use_header_stamp value="true" />
+   <discard_large_arrays value="true" />
+   <max_array_size value="1000" />
+   <boolean_strings_to_number value="true" />
+   <remove_suffix_from_strings value="true" />
+   <selected_topics value="/shimmer1/emg_stream;/shimmer2/emg_stream;/shimmer3/emg_stream;/shimmer4/emg_stream;/grip_force_stream" />
+  </plugin>
+  <plugin ID="UDP Server" />
+  <plugin ID="WebSocket Server" />
+  <plugin ID="ZMQ Subscriber" />
+  <plugin ID="Fast Fourier Transform" />
+  <plugin ID="Quaternion to RPY" />
+  <plugin ID="Reactive Script Editor">
+   <library code="--[[ Helper function to create a series from arrays&#10;&#10; new_series: a series previously created with ScatterXY.new(name)&#10; prefix:     prefix of the timeseries, before the index of the array&#10; suffix_X:   suffix to complete the name of the series containing the X value. If [nil], use the index of the array.&#10; suffix_Y:   suffix to complete the name of the series containing the Y value&#10; timestamp:   usually the tracker_time variable&#10;              &#10; Example:&#10; &#10; Assuming we have multiple series in the form:&#10; &#10;   /trajectory/node.{X}/position/x&#10;   /trajectory/node.{X}/position/y&#10;   &#10; where {N} is the index of the array (integer). We can create a reactive series from the array with:&#10; &#10;   new_series = ScatterXY.new(&quot;my_trajectory&quot;) &#10;   CreateSeriesFromArray( new_series, &quot;/trajectory/node&quot;, &quot;position/x&quot;, &quot;position/y&quot;, tracker_time );&#10;--]]&#10;&#10;function CreateSeriesFromArray( new_series, prefix, suffix_X, suffix_Y, timestamp )&#10;  &#10;  --- clear previous values&#10;  new_series:clear()&#10;  &#10;  --- Append points to new_series&#10;  index = 0&#10;  while(true) do&#10;&#10;    x = index;&#10;    -- if not nil, get the X coordinate from a series&#10;    if suffix_X ~= nil then &#10;      series_x = TimeseriesView.find( string.format( &quot;%s.%d/%s&quot;, prefix, index, suffix_X) )&#10;      if series_x == nil then break end&#10;      x = series_x:atTime(timestamp)&#09; &#10;    end&#10;    &#10;    series_y = TimeseriesView.find( string.format( &quot;%s.%d/%s&quot;, prefix, index, suffix_Y) )&#10;    if series_y == nil then break end &#10;    y = series_y:atTime(timestamp)&#10;    &#10;    new_series:push_back(x,y)&#10;    index = index+1&#10;  end&#10;end&#10;&#10;--[[ Similar to the built-in function GetSeriesNames(), but select only the names with a give prefix. --]]&#10;&#10;function GetSeriesNamesByPrefix(prefix)&#10;  -- GetSeriesNames(9 is a built-in function&#10;  all_names = GetSeriesNames()&#10;  filtered_names = {}&#10;  for i, name in ipairs(all_names)  do&#10;    -- check the prefix&#10;    if name:find(prefix, 1, #prefix) then&#10;      table.insert(filtered_names, name);&#10;    end&#10;  end&#10;  return filtered_names&#10;end&#10;&#10;--[[ Modify an existing series, applying offsets to all their X and Y values&#10;&#10; series: an existing timeseries, obtained with TimeseriesView.find(name)&#10; delta_x: offset to apply to each x value&#10; delta_y: offset to apply to each y value &#10;  &#10;--]]&#10;&#10;function ApplyOffsetInPlace(series, delta_x, delta_y)&#10;  -- use C++ indeces, not Lua indeces&#10;  for index=0, series:size()-1 do&#10;    x,y = series:at(index)&#10;    series:set(index, x + delta_x, y + delta_y)&#10;  end&#10;end&#10;" />
+   <scripts />
+  </plugin>
+  <plugin ID="CSV Exporter" />
+  <plugin ID="ROS2 Topic Re-Publisher" />
+ </Plugins>
+ <previouslyLoaded_Datafiles />
+ <previouslyLoaded_Streamer name="ROS2 Topic Subscriber" />
+ <customMathEquations />
+ <snippets />
+</root>

@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "recording_id": "91cd7cb2f12949338e3194729093ead8",
+  "session": "P01_mvc",
+  "created_utc": "2026-11-13T12:21:22.747181+00:00",
+  "start_ns": 1794572451121334756,
+  "end_ns": 1794572481121334756,
+  "phases": [],
+  "mvc_n": null,
+  "emg_topics": [
+    "/shimmer1/emg_processed"
+  ],
+  "raw_emg_topics": [
+    "/shimmer1/emg_stream"
+  ],
+  "force_topic": "/grip_force_stream",
+  "features": [
+    "/shimmer1/emg_processed/ch1_mv",
+    "/shimmer1/emg_processed/ch2_mv"
+  ],
+  "frame_ids": {
+    "/shimmer1/emg_processed": [
+      "Shimmer_4C91"
+    ],
+    "/grip_force_stream": [
+      "grip"
+    ]
+  },
+  "raw_frame_ids": {
+    "/shimmer1/emg_stream": [
+      "Shimmer_4C91"
+    ]
+  },
+  "streams": {
+    "/shimmer1/emg_processed": {
+      "samples": 15360,
+      "expected_hz": 512.0,
+      "observed_hz": 512.0,
+      "frequency_error_percent": 0.0,
+      "received_hz": 511.8899854956504,
+      "median_receipt_delay_ms": 605.0590955,
+      "p95_receipt_delay_ms": 801.02193865,
+      "non_increasing": 0,
+      "max_gap_ms": 1.953125
+    },
+    "/shimmer1/emg_stream": {
+      "samples": 15360,
+      "expected_hz": 512.0,
+      "observed_hz": 512.0,
+      "frequency_error_percent": 0.0,
+      "received_hz": 511.7977225625873,
+      "median_receipt_delay_ms": 302.86992799999996,
+      "p95_receipt_delay_ms": 306.8321079,
+      "non_increasing": 0,
+      "max_gap_ms": 1.953125
+    },
+    "/grip_force_stream": {
+      "samples": 5999,
+      "expected_hz": 200.0,
+      "observed_hz": 199.95708106943565,
+      "frequency_error_percent": -0.0214594652821809,
+      "received_hz": 199.85526307249827,
+      "median_receipt_delay_ms": 55.809507,
+      "p95_receipt_delay_ms": 95.4307029,
+      "non_increasing": 73,
+      "max_gap_ms": 21.909846
+    }
+  },
+  "alignment": "force_header_stamp_with_bounded_linear_emg_interpolation",
+  "timing_basis": "ROS header timestamps; no hardware synchronization or delay correction",
+  "max_emg_gap_ns": 20000000,
+  "aligned_rows": 5999,
+  "coverage_fraction": 0.9988215229333334
+}

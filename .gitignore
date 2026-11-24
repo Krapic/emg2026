@@ -1,0 +1,20 @@
+# colcon
+build/
+install/
+log/
+
+# Stanje pokretača i snimke ROS topica
+.lab-run/
+grip_eval/
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+
+# Uređivači
+.vscode/
+.idea/
+*.swp
+*~

@@ -1,0 +1,8 @@
+string[] training_ids
+string[] validation_ids
+---
+bool success
+string message
+string model_path
+uint32 training_rows
+uint32 validation_rows

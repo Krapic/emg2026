@@ -1,0 +1,10 @@
+string session
+float64 duration_sec
+bool guided
+float64 mvc_n
+---
+bool success
+string message
+string recording_id
+string directory
+uint32 aligned_rows

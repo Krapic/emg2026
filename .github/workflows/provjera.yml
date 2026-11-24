@@ -1,0 +1,63 @@
+name: Provjera
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  bez-ros-a:
+    name: Jezgra i izvještaj bez ROS-a
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      # Sistemski Python 3.10 i NumPy iz Ubuntua 22.04, kao na laboratorijskom računalu.
+      - name: Ovisnosti
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-numpy python3-pytest
+      - name: Izvještaj na priloženim snimkama
+        run: /usr/bin/python3 tests/test_analiza.py
+      - name: Jezgra i provjere snimki
+        working-directory: src/shimmer_ros2
+        run: /usr/bin/python3 -m pytest test/test_grip_data.py test/test_grip_report.py
+
+  ros:
+    name: Izgradnja i sintetički test u ROS 2 Humble
+    runs-on: ubuntu-22.04
+    container: ros:humble-ros-base
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ovisnosti
+        run: |
+          apt-get update
+          apt-get install -y python3-pip python3-numpy python3-scipy python3-yaml \
+            python3-serial python3-pexpect python3-pytest psmisc
+          /usr/bin/python3 -m pip install godirect==1.2.1
+      - name: Izgradnja
+        run: |
+          source /opt/ros/humble/setup.bash
+          colcon build --symlink-install --cmake-args -DAMENT_CMAKE_SYMLINK_INSTALL=OFF
+      - name: Testovi pokretača
+        run: |
+          source /opt/ros/humble/setup.bash
+          source install/setup.bash
+          /usr/bin/python3 tests/test_lab_launcher.py
+      - name: Čitanje EMG paketa
+        working-directory: src/shimmer_ros2
+        run: |
+          source /opt/ros/humble/setup.bash
+          source ../../install/setup.bash
+          /usr/bin/python3 -m pytest test/test_framing.py
+      - name: Snimanje, treniranje i estimacija na sintetičkim tokovima
+        run: ./pokreni.sh self-test
+      - name: Zapisi izgradnje
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: colcon-log
+          path: log

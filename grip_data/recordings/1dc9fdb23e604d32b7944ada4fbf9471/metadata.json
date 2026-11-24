@@ -1,0 +1,139 @@
+{
+  "version": 1,
+  "recording_id": "1dc9fdb23e604d32b7944ada4fbf9471",
+  "session": "P01_ucenje",
+  "created_utc": "2026-11-13T12:22:43.498938+00:00",
+  "start_ns": 1794572531840731863,
+  "end_ns": 1794572561840731863,
+  "phases": [
+    {
+      "target_percent_mvc": 100,
+      "target_n": 257.72393798828125,
+      "duration_sec": 6.0,
+      "cue_stamp_ns": 1794572531840753722,
+      "planned_start_ns": 1794572531840731863,
+      "planned_end_ns": 1794572537840731863
+    },
+    {
+      "target_percent_mvc": 0,
+      "target_n": 0.0,
+      "duration_sec": 1.5,
+      "cue_stamp_ns": 1794572537840889657,
+      "planned_start_ns": 1794572537840731863,
+      "planned_end_ns": 1794572539340731863
+    },
+    {
+      "target_percent_mvc": 75,
+      "target_n": 193.29295349121094,
+      "duration_sec": 6.0,
+      "cue_stamp_ns": 1794572539340894169,
+      "planned_start_ns": 1794572539340731863,
+      "planned_end_ns": 1794572545340731863
+    },
+    {
+      "target_percent_mvc": 0,
+      "target_n": 0.0,
+      "duration_sec": 1.5,
+      "cue_stamp_ns": 1794572545340915999,
+      "planned_start_ns": 1794572545340731863,
+      "planned_end_ns": 1794572546840731863
+    },
+    {
+      "target_percent_mvc": 50,
+      "target_n": 128.86196899414062,
+      "duration_sec": 6.0,
+      "cue_stamp_ns": 1794572546840910434,
+      "planned_start_ns": 1794572546840731863,
+      "planned_end_ns": 1794572552840731863
+    },
+    {
+      "target_percent_mvc": 0,
+      "target_n": 0.0,
+      "duration_sec": 1.5,
+      "cue_stamp_ns": 1794572552840885441,
+      "planned_start_ns": 1794572552840731863,
+      "planned_end_ns": 1794572554340731863
+    },
+    {
+      "target_percent_mvc": 25,
+      "target_n": 64.43098449707031,
+      "duration_sec": 6.0,
+      "cue_stamp_ns": 1794572554340896954,
+      "planned_start_ns": 1794572554340731863,
+      "planned_end_ns": 1794572560340731863
+    },
+    {
+      "target_percent_mvc": 0,
+      "target_n": 0.0,
+      "duration_sec": 1.5,
+      "cue_stamp_ns": 1794572560340910505,
+      "planned_start_ns": 1794572560340731863,
+      "planned_end_ns": 1794572561840731863
+    }
+  ],
+  "mvc_n": 257.72393798828125,
+  "emg_topics": [
+    "/shimmer1/emg_processed"
+  ],
+  "raw_emg_topics": [
+    "/shimmer1/emg_stream"
+  ],
+  "force_topic": "/grip_force_stream",
+  "features": [
+    "/shimmer1/emg_processed/ch1_mv",
+    "/shimmer1/emg_processed/ch2_mv"
+  ],
+  "frame_ids": {
+    "/shimmer1/emg_processed": [
+      "Shimmer_4C91"
+    ],
+    "/grip_force_stream": [
+      "grip"
+    ]
+  },
+  "raw_frame_ids": {
+    "/shimmer1/emg_stream": [
+      "Shimmer_4C91"
+    ]
+  },
+  "streams": {
+    "/shimmer1/emg_processed": {
+      "samples": 15360,
+      "expected_hz": 512.0,
+      "observed_hz": 512.0,
+      "frequency_error_percent": 0.0,
+      "received_hz": 512.128436943781,
+      "median_receipt_delay_ms": 636.4244100000001,
+      "p95_receipt_delay_ms": 834.45108965,
+      "non_increasing": 0,
+      "max_gap_ms": 1.953125
+    },
+    "/shimmer1/emg_stream": {
+      "samples": 15360,
+      "expected_hz": 512.0,
+      "observed_hz": 512.0,
+      "frequency_error_percent": 0.0,
+      "received_hz": 511.9648224157869,
+      "median_receipt_delay_ms": 337.7598425,
+      "p95_receipt_delay_ms": 339.8635236,
+      "non_increasing": 0,
+      "max_gap_ms": 1.953125
+    },
+    "/grip_force_stream": {
+      "samples": 6000,
+      "expected_hz": 200.0,
+      "observed_hz": 199.97933485091514,
+      "frequency_error_percent": -0.010332574542426531,
+      "received_hz": 200.01706564008677,
+      "median_receipt_delay_ms": 54.098937,
+      "p95_receipt_delay_ms": 94.22265190000022,
+      "non_increasing": 88,
+      "max_gap_ms": 29.020352
+    }
+  },
+  "alignment": "force_header_stamp_with_bounded_linear_emg_interpolation",
+  "timing_basis": "ROS header timestamps; no hardware synchronization or delay correction",
+  "max_emg_gap_ns": 20000000,
+  "aligned_rows": 5999,
+  "coverage_fraction": 0.9972592881333333
+}
