@@ -1,5 +1,7 @@
 # EMG 2026 — procjena sile stiska iz površinskog EMG-a
 
+[![Provjera](https://github.com/Krapic/emg2026/actions/workflows/provjera.yml/badge.svg)](https://github.com/Krapic/emg2026/actions/workflows/provjera.yml)
+
 ROS 2 Humble projekt koji iz signala senzora Shimmer3 EMG procjenjuje silu stiska šake. Kao referenca pri snimanju i učenju služi dinamometar Vernier Go Direct. Projekt je seminarski rad iz kolegija Upravljanje mehatroničkim sustavima.
 
 ## Kako radi
@@ -14,7 +16,7 @@ Jedna naredba, `./pokreni.sh`, uparuje uređaje, pokreće čvorove i otvara Plot
 
 ## Stanje
 
-Snimanje, treniranje i procjena su implementirani i 20. studenoga 2026. prošli su test na sintetičkim tokovima; kasnije izmjene pokretača taj test još nisu prošle. Nije pokazano da model radi na pravom stisku: u priloženim snimkama `P01_ucenje` i `P01_validacija` ispitanik gotovo ne stišće, pa objavljena pogreška (RMSE 4,17 N) opisuje mirovanje. Predikcija sile unaprijed nije započeta. Što je provjereno i što preostaje stoji u [PLAN_RADA.md](PLAN_RADA.md).
+Snimanje, treniranje i procjena su implementirani i prolaze test na sintetičkim tokovima, koji se na GitHubu ponavlja nakon svakog slanja. Još nije pokazano da model radi na pravom stisku: u priloženim snimkama `P01_ucenje` i `P01_validacija` ispitanik gotovo ne stišće, pa objavljena pogreška (RMSE 4,17 N) opisuje mirovanje. Predikcija sile unaprijed nije započeta. Što je provjereno i što preostaje stoji u [PLAN_RADA.md](PLAN_RADA.md).
 
 ## Brzi početak
 

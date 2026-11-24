@@ -24,7 +24,7 @@ colcon build --symlink-install --cmake-args -DAMENT_CMAKE_SYMLINK_INSTALL=OFF
 ./pokreni.sh self-test
 ```
 
-Dana 20. studenoga 2026. prošla je čista izgradnja sva tri paketa, sintetički integracijski test i 10 testova pokretača i čitanja EMG paketa. Izmjene od 22. studenoga (izvještaj o snimkama i modelu, oznake sesija u `record` i `train`) provjerene su samo bez ROS-a. Zato nakon izgradnje uz `self-test` pokreni i `python3 tests/test_lab_launcher.py`; stanje je u [PLAN_RADA.md](PLAN_RADA.md#što-je-provjereno).
+Čista izgradnja sva tri paketa, sintetički integracijski test i testovi pokretača i čitanja EMG paketa prošli su 24. studenoga 2026. u ROS 2 Humble kontejneru na GitHubu. Ista se provjera ponavlja nakon svakog slanja; stanje je u [PLAN_RADA.md](PLAN_RADA.md#što-je-provjereno).
 
 `colcon` ponovno stvara `build/`, `install/` i `log/` za tvoje računalo. Git čuva izvršnu dozvolu skripti. Ako projekt preuzmeš kao ZIP i ona nestane, vrati je naredbom `chmod +x pokreni.sh src/shimmer_ros2/scripts/bind_shimmer_to_rfcomm.sh`.
 

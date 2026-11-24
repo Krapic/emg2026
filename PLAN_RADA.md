@@ -17,8 +17,8 @@ Upozorenja ispisuje pokretač. Sami servisi ih ne vraćaju, pa ih izravan `ros2 
 
 | Provjera | Rezultat |
 |---|---|
-| Jedan sintetički Shimmer | Stanje od 20. studenoga prošlo je cijeli ROS 2 postupak snimanja, treniranja i procjene, uključujući oporavak nakon prekida EMG-a i odbijanje nevaljanog modela. Izmjene pokretača od 22. studenoga (izvještaj nakon `record` i `train`, oznake sesija) još nisu prošle `./pokreni.sh self-test`. |
-| Testovi bez ROS-a | 25 testova poravnanja, odgoda, regresije i izvještaja prolazi na Windowsu s Pythonom 3.13 i NumPyjem 2.3. Na Ubuntuu s Pythonom 3.10 nisu pokrenuti. |
+| Jedan sintetički Shimmer | `./pokreni.sh self-test` prošao je 24. studenoga u ROS 2 Humble kontejneru na GitHubu: cijeli postupak snimanja, treniranja i procjene, uključujući izvještaj nakon `record` i `train`, oznake sesija, oporavak nakon prekida EMG-a i odbijanje nevaljanog modela. Prošlo je i 9 testova pokretača i 4 testa čitanja EMG paketa. Provjera se ponavlja nakon svakog slanja na GitHub. Na računalu s opremom izmjene od 22. studenoga još nisu pokrenute. |
+| Testovi bez ROS-a | 25 testova poravnanja, odgoda, regresije i izvještaja prolazi na Ubuntuu 22.04 sa sistemskim Pythonom 3.10 i NumPyjem (provjera na GitHubu) te na Windowsu s Pythonom 3.13 i NumPyjem 2.3. |
 | Postojeće laboratorijske snimke | `P01_validacija` ne sadrži stisak, a `P01_ucenje` samo nekoliko kratkih koji ne prate zadane razine. MAE 3,57 N i RMSE 4,17 N na 5 900 validacijskih redaka (5,04 N bez vremenskih odgoda) zato opisuju pogrešku u mirovanju. Na `P01_mvc`, jedinoj snimci s pravim stiskom, isti model ima RMSE 25,0 N i od polovice vršne sile naviše procjenjuje premalo. |
 | Fizički uređaji | Procjena uživo sa Shimmerom 4C91 i dinamometrom nije provjerena. Nije provjeren ni način bez dinamometra. |
 | Kašnjenje | U tri postojeće snimke obrađeni EMG stiže s medijanom od 605 do 656 ms nakon vremenske oznake uzorka, uz 95. percentil od 801 do 854 ms. Sirovi EMG stiže nakon 303 do 359 ms. Kašnjenje same procjene nije izmjereno. |
@@ -27,7 +27,7 @@ Putanja modela, ulazne snimke i naredba za učitavanje zapisane su u [uputama za
 
 ## Preostali koraci
 
-1. **Potvrditi izmjene pokretača na Ubuntuu.** Nakon izgradnje pokrenuti `./pokreni.sh self-test` i `python3 tests/test_lab_launcher.py`.
+1. **Prenijeti projekt na računalo s opremom.** Klonirati repozitorij s GitHuba, izgraditi ga i pokrenuti `./pokreni.sh self-test` kao provjeru instalacije.
 2. **Snimiti valjane pokuse i istrenirati novi model.** Sa Shimmerom 4C91 pri 512 Hz i dinamometrom snimiti maksimalni stisak, pokus za učenje i pokus za validaciju. Ponoviti svaki pokus za koji izvještaj javi da zadane razine nisu praćene. Pogledati pogrešku novog modela po razinama sile. Za svaki pokušaj zabilježiti položaj ruke i elektroda.
 3. **Provjeriti estimaciju uživo s opremom.** Učitati novi model i napraviti novi pokušaj uz dinamometar. Usporediti obje krivulje u PlotJuggleru i spremiti ih za analizu, s vremenom na koje se procjena odnosi i vremenom primitka. CSV snimke sadrže referentnu silu i EMG, pa za brojčanu provjeru izlaza uživo treba zasebno zabilježiti i `/grip_force_estimated`.
 4. **Izmjeriti točnost i kašnjenje na novim pokušajima.** Dogovoriti prag pogreške u N ili % MVC i prihvatljivo kašnjenje. MAE, RMSE i pomak po razinama sile daje `python3 scripts/analiza.py evaluate`. Pogrešku pri stisku i otpuštanju, starost procjene pri primitku i vremensko poravnanje dinamometra i EMG-a još treba izračunati zasebno. Odvojiti cijele snimke za učenje, odabir postavki i završni test.
