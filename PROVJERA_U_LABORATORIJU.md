@@ -67,6 +67,8 @@ Prag za „dovoljno dobro” još nije dogovoren s nastavnicima. Zapisani brojev
 
 - [ ] Uz aktivan model ispitanik stisne nekoliko puta. U PlotJuggleru se procijenjena sila po obliku poklapa s izmjerenom, uz vidljivo kašnjenje.
 - [ ] `python3 scripts/analiza.py evaluate --recordings P02_pokus3` daje pogrešku na snimci koju model nije vidio ni pri učenju ni pri validaciji. To je broj za seminar.
+- [ ] Zelena krivulja prognoze nastavlja se na procijenjenu silu i pri stisku je prestiže, bez skokova i bez bježanja izvan raspona sile.
+- [ ] `python3 scripts/analiza.py predict --recordings P02_pokus3` pokazuje je li prognoza bolja od zadržavanja zadnje procjene. Tumačenje je u [PREDIKCIJA.md](PREDIKCIJA.md#provjera-na-snimkama).
 - [ ] Tok uživo je spremljen naredbom `ros2 bag record` iz [KRENI_OVDJE.md](KRENI_OVDJE.md#što-prvo-napraviti-kad-imaš-opremu). Bez te snimke točnost i kašnjenje procjene uživo ne mogu se izračunati naknadno.
 - [ ] Po želji: demonstracija samo sa Shimmerom i modelom prema [uputama za procjenu bez dinamometra](POKRETANJE.md#procjena-bez-dinamometra), s putanjom novog modela.
 

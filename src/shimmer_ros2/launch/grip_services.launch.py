@@ -31,7 +31,9 @@ def start_nodes(context):
     topics = [f'/{name}/emg_processed' for name in namespaces]
     estimator = Node(package='shimmer_ros2', executable='grip_estimator', output='screen',
                      parameters=[{'emg_topics': topics,
-                                  'expected_emg_hz': settings['sampling_rate']}])
+                                  'expected_emg_hz': settings['sampling_rate'],
+                                  'prediction_horizon_ms': float(LaunchConfiguration(
+                                      'prediction_horizon_ms').perform(context))}])
     if LaunchConfiguration('estimation_only').perform(context) == 'true':
         return [*processors, estimator]
     return [
@@ -52,6 +54,7 @@ def generate_launch_description():
         DeclareLaunchArgument('emg_hz', default_value='992.96969699'),
         DeclareLaunchArgument('processors_only', default_value='false', choices=['true', 'false']),
         DeclareLaunchArgument('estimation_only', default_value='false', choices=['true', 'false']),
+        DeclareLaunchArgument('prediction_horizon_ms', default_value='500.0'),
         DeclareLaunchArgument('data_dir', default_value=str(Path.home() / 'emg2026' / 'grip_data')),
         OpaqueFunction(function=start_nodes),
     ])

@@ -36,6 +36,7 @@ Pregledaj priložene snimke i model. Dovoljan je Python s NumPyjem, bez ROS-a, p
 python3 scripts/analiza.py                    # sve snimke i modeli, s upozorenjima
 python3 scripts/analiza.py check P01_ucenje   # cilj i držana sila po fazama snimke
 python3 scripts/analiza.py evaluate           # pogreška najnovijeg modela po razinama sile
+python3 scripts/analiza.py predict            # prognoza procjene prema zadržavanju zadnje vrijednosti
 ```
 
 Snimku zadaj oznakom sesije ili početkom ID-ja. `evaluate` koristi iste funkcije za značajke i metrike kao trener i reproducira **5 900 redaka, MAE 3,57 N, RMSE 4,17 N** na snimci `P01_validacija`. Na istim redcima model bez vremenskih odgoda imao je RMSE 5,04 N.
@@ -49,7 +50,9 @@ python3 tests/test_analiza.py
 (cd src/shimmer_ros2 && python3 -m pytest test/test_grip_data.py test/test_grip_report.py)
 ```
 
-Dok nemaš opremu, možeš pripremiti skriptu za usporedbu signala po `header.stamp` i prvi offline pokus predikcije. Za Hankel-DMD usporedi horizonte 100, 250 i 500 ms s prognozom koja zadržava posljednju dostupnu estimaciju. Pri odabiru ciljnog vremena koristi stvarni trenutak izdavanja prognoze. Za završnu provjeru pripremi odvojene cijele snimke.
+Naredba `predict` za horizonte 100, 250 i 500 ms uspoređuje Hankel-DMD prognozu s prognozom koja zadržava zadnju procjenu. Na priloženim snimkama razlika je mala i nedosljedna; pojedinosti su u [PREDIKCIJA.md](PREDIKCIJA.md).
+
+Dok nemaš opremu, možeš pripremiti skriptu koja iz bag snimke uspoređuje izmjerenu, procijenjenu i prognoziranu silu po `header.stamp` i računa kašnjenje pri primitku. Za završnu provjeru pripremi odvojene cijele snimke.
 
 ## Što prvo napraviti kad imaš opremu
 
@@ -71,7 +74,8 @@ Dok nemaš opremu, možeš pripremiti skriptu za usporedbu signala po `header.st
    source install/setup.bash
    mkdir -p grip_eval
    ros2 bag record -o grip_eval/pokus_01 /grip_force_stream \
-     /grip_force_estimated /shimmer1/emg_processed /grip_force_target
+     /grip_force_estimated /grip_force_predicted /grip_force_target \
+     /shimmer1/emg_processed
    ```
 
    Nakon pokušaja zaustavi `ros2 bag record` s `Ctrl+C` i provjeri broj poruka naredbom `ros2 bag info grip_eval/pokus_01`. Za sljedeći pokušaj koristi novo ime izlaza.
@@ -87,10 +91,12 @@ Provjera novog modela uživo s opremom i demonstracija bez dinamometra ostaju ot
 - [PROVJERA_U_LABORATORIJU.md](PROVJERA_U_LABORATORIJU.md) — kontrolni popis za termin s opremom: što provjeriti i kada je korak prošao.
 - [POKRETANJE.md](POKRETANJE.md) — pokretanje, Bluetooth i dijagnostika.
 - [SNIMANJE_I_MODEL.md](SNIMANJE_I_MODEL.md) — MVC, snimanje, treniranje, učitavanje i identifikatori snimki.
+- [PREDIKCIJA.md](PREDIKCIJA.md) — prognoza sile Hankel-DMD-om: postupak, provjera i dosadašnji rezultati.
 - [PLAN_RADA.md](PLAN_RADA.md) — stanje implementacije, preostali koraci i radovi za predikciju.
 - `grip_data/recordings/` — `P01_mvc`, `P01_ucenje` i `P01_validacija`. Svaka je u mapi označenoj ID-jem iz uputa.
 - `src/shimmer_ros2/shimmer_ros2/grip_data.py` i `nodes/grip_estimator.py` unutar istog Python paketa — funkcije za poravnanje i regresiju te ROS čvor za estimaciju.
 - `scripts/analiza.py` i `src/shimmer_ros2/shimmer_ros2/grip_report.py` — izvještaj o snimkama i modelu bez ROS-a te provjere na kojima se temelji.
+- `src/shimmer_ros2/shimmer_ros2/grip_forecast.py` — Hankel-DMD prognoza procijenjene sile, također bez ROS-a.
 - `tests/` i `src/shimmer_ros2/test/` — testovi pokretača i izvještaja te testovi jezgre i čitanja EMG paketa.
 - `src/` — tri ROS 2 paketa preuzeta iz repozitorija autora `tbazina`. Izvorne verzije i popis izmjena su u [src/README.md](src/README.md).
 - `.github/workflows/provjera.yml` — provjera na GitHubu nakon svakog slanja: testovi bez ROS-a te izgradnja i sintetički test u ROS 2 Humble.

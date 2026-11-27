@@ -121,6 +121,7 @@ ros2 launch shimmer_ros2 grip_services.launch.py \
 | `data_dir` | `~/emg2026/grip_data` | Where recordings and models are stored. |
 | `processors_only` | `false` | Start only the EMG processors. |
 | `estimation_only` | `false` | Start the processors and the estimator, without recorder and trainer. |
+| `prediction_horizon_ms` | `500.0` | How far the forecast reaches past the newest estimate; `0` turns it off. |
 
 These defaults differ from `./pokreni.sh`, which uses one Shimmer at 512 Hz and
 the `grip_data` folder of the workspace. Pass the arguments explicitly when
@@ -130,7 +131,7 @@ launching by hand.
 |---|---|---|
 | `grip_recorder` | service `/record_grip` (`RecordGrip`), topic `/grip_force_target` | Records raw and processed EMG with the measured force for 20 to 35 s, guided through 100, 75, 50 and 25 % MVC or free, and saves the streams, the aligned table and metadata. |
 | `grip_trainer` | service `/train_grip_model` (`TrainGrip`) | Fits a ridge regression on the first EMG channel at delays of 0 to 500 ms and saves it as JSON with training and validation error. |
-| `grip_estimator` | service `/load_grip_model` (`LoadGripModel`), topic `/grip_force_estimated` | Applies a loaded model to processed EMG and publishes the estimated force at 200 Hz. |
+| `grip_estimator` | service `/load_grip_model` (`LoadGripModel`), topics `/grip_force_estimated` and `/grip_force_predicted` | Applies a loaded model to processed EMG and publishes the estimated force at 200 Hz. Extends the estimate by a Hankel-DMD forecast of up to `prediction_horizon_ms` past its newest sample, at 40 Hz; each forecast message is stamped with the time it refers to. |
 
 ```bash
 ros2 service call /record_grip emg_grip_interfaces/srv/RecordGrip \
@@ -147,11 +148,12 @@ level come from `./pokreni.sh` and `scripts/analiza.py` in the workspace.
 
 `shimmer_ros2/grip_data.py` holds the alignment, delayed features and
 regression shared by the trainer and the estimator. `shimmer_ros2/grip_report.py`
-holds the checks of recordings and models. Both need only NumPy, so their tests
-run without ROS from this package's folder:
+holds the checks of recordings and models, and `shimmer_ros2/grip_forecast.py`
+the forecast of the estimate. All three need only NumPy, so their tests run
+without ROS from this package's folder:
 
 ```bash
-python3 -m pytest test/test_grip_data.py test/test_grip_report.py
+python3 -m pytest test/test_grip_data.py test/test_grip_report.py test/test_grip_forecast.py
 ```
 
 ## Visualizing data

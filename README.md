@@ -11,12 +11,13 @@ ROS 2 Humble projekt koji iz signala senzora Shimmer3 EMG procjenjuje silu stisk
 3. `./pokreni.sh record` snima obrađeni EMG i izmjerenu silu dok ispitanik prati zadane razine stiska.
 4. `./pokreni.sh train` uči linearni model s vremenskim odgodama EMG-a do 500 ms.
 5. Uz učitan model sustav objavljuje procijenjenu silu na `/grip_force_estimated` pri 200 Hz.
+6. Hankel-DMD prediktor produljuje procjenu do 0,5 s unaprijed i objavljuje je na `/grip_force_predicted`.
 
 Jedna naredba, `./pokreni.sh`, uparuje uređaje, pokreće čvorove i otvara PlotJuggler.
 
 ## Stanje
 
-Snimanje, treniranje i procjena su implementirani i prolaze test na sintetičkim tokovima, koji se na GitHubu ponavlja nakon svakog slanja. Još nije pokazano da model radi na pravom stisku: u priloženim snimkama `P01_ucenje` i `P01_validacija` ispitanik gotovo ne stišće, pa objavljena pogreška (RMSE 4,17 N) opisuje mirovanje. Predikcija sile unaprijed nije započeta. Što je provjereno i što preostaje stoji u [PLAN_RADA.md](PLAN_RADA.md).
+Snimanje, treniranje i procjena su implementirani i prolaze test na sintetičkim tokovima, koji se na GitHubu ponavlja nakon svakog slanja. Još nije pokazano da model radi na pravom stisku: u priloženim snimkama `P01_ucenje` i `P01_validacija` ispitanik gotovo ne stišće, pa objavljena pogreška (RMSE 4,17 N) opisuje mirovanje. Predikcija je implementirana, ali na postojećim snimkama nije pokazala jasnu korist u odnosu na zadržavanje zadnje procjene. Što je provjereno i što preostaje stoji u [PLAN_RADA.md](PLAN_RADA.md).
 
 ## Brzi početak
 
@@ -36,6 +37,7 @@ Priložene snimke i model možeš pregledati bez ROS-a, na bilo kojem sustavu s 
 python3 scripts/analiza.py                    # sve snimke i modeli, s upozorenjima
 python3 scripts/analiza.py check P01_ucenje   # cilj i držana sila po fazama snimke
 python3 scripts/analiza.py evaluate           # pogreška modela po razinama sile
+python3 scripts/analiza.py predict            # prognoza procjene prema zadržavanju zadnje vrijednosti
 ```
 
 ## Upute
@@ -44,6 +46,7 @@ python3 scripts/analiza.py evaluate           # pogreška modela po razinama sil
 - [PROVJERA_U_LABORATORIJU.md](PROVJERA_U_LABORATORIJU.md) — kontrolni popis za termin s opremom.
 - [POKRETANJE.md](POKRETANJE.md) — pokretanje, Bluetooth i dijagnostika.
 - [SNIMANJE_I_MODEL.md](SNIMANJE_I_MODEL.md) — maksimalni stisak, snimanje, treniranje i učitavanje modela.
+- [PREDIKCIJA.md](PREDIKCIJA.md) — kako radi prognoza sile, kako je provjeriti i što je dosad pokazala.
 - [PLAN_RADA.md](PLAN_RADA.md) — stanje implementacije i preostali koraci.
 
 ## Sadržaj
@@ -52,7 +55,7 @@ python3 scripts/analiza.py evaluate           # pogreška modela po razinama sil
 |---|---|
 | `pokreni.sh`, `scripts/lab.py` | Pokretač laboratorija i naredbe `record`, `train`, `estimate`, `self-test`. |
 | `scripts/analiza.py` | Izvještaj o snimkama i modelu bez ROS-a. |
-| `src/shimmer_ros2` | Čitanje i obrada EMG-a, snimanje, treniranje i procjena sile. |
+| `src/shimmer_ros2` | Čitanje i obrada EMG-a, snimanje, treniranje, procjena i prognoza sile. |
 | `src/godirect_ros2` | Čitanje sile s dinamometra i rasporedi za PlotJuggler. |
 | `src/emg_grip_interfaces` | Definicije poruka i servisa. |
 | `grip_data/` | Tri laboratorijske snimke jednog ispitanika i referentni model. |

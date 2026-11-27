@@ -26,5 +26,5 @@ Povijest izvornih repozitorija nije prenesena. Za usporedbu s izvornikom klonira
 
 - Izmijenjeno: `README.md`, `package.xml`, `setup.py`, `scripts/bind_shimmer_to_rfcomm.sh`, `shimmer_ros2/nodes/emg_processor.py`, `shimmer_ros2/nodes/shimmer_publisher.py`, `shimmer_ros2/shimmer_api/emg.py`.
 - Dodano u `launch/`: `grip_services.launch.py`, `publish_three_emg.launch.py`, `publish_four_emg.launch.py`.
-- Dodano u `shimmer_ros2/`: `grip_data.py`, `grip_report.py`, `nodes/grip_services.py`, `nodes/grip_estimator.py`, `shimmer_api/framing.py`.
-- Dodano u `test/`: `test_framing.py`, `test_grip_data.py`, `test_grip_report.py`.
+- Dodano u `shimmer_ros2/`: `grip_data.py`, `grip_report.py`, `grip_forecast.py`, `nodes/grip_services.py`, `nodes/grip_estimator.py`, `shimmer_api/framing.py`.
+- Dodano u `test/`: `test_framing.py`, `test_grip_data.py`, `test_grip_report.py`, `test_grip_forecast.py`.

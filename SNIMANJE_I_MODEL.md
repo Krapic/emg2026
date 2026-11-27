@@ -89,6 +89,10 @@ primjena vremenskih odgoda iz [rada o estimaciji sile stiska](https://arxiv.org/
 Model procjenjuje silu za vremensku oznaku EMG-a. Za prikaz uživo koristi
 mrežu od 200 Hz. Nakon prekida čeka novu neprekinutu EMG povijest od 500 ms.
 
+Uz procjenu se na `/grip_force_predicted` objavljuje njezina prognoza do
+500 ms unaprijed, u PlotJuggleru zelenom krivuljom. Postupak, provjera na
+snimkama i dosadašnji rezultati opisani su u [PREDIKCIJA.md](PREDIKCIJA.md).
+
 Postojeće snimke s dva kanala mogu se koristiti za treniranje jer se iz
 njih očitava prvi kanal. Modele koji su učili iz oba kanala treba ponovno
 istrenirati iz snimki.
