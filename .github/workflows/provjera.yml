@@ -21,7 +21,7 @@ jobs:
         run: /usr/bin/python3 tests/test_analiza.py
       - name: Jezgra i provjere snimki
         working-directory: src/shimmer_ros2
-        run: /usr/bin/python3 -m pytest test/test_grip_data.py test/test_grip_report.py
+        run: /usr/bin/python3 -m pytest test/test_grip_data.py test/test_grip_report.py test/test_grip_forecast.py
 
   ros:
     name: Izgradnja i sintetički test u ROS 2 Humble

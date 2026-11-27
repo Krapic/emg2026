@@ -40,6 +40,14 @@ class BundledDataTests(unittest.TestCase):
         self.assertEqual(status, 0)
         self.assertEqual(text.count('nije praćeno'), 4)
 
+    def test_forecast_is_compared_with_holding_the_estimate(self):
+        status, text = report('predict', str(MODEL), '--recordings', 'P01_mvc',
+                              '--horizons', '250')
+        self.assertEqual(status, 0)
+        row = next(line.split() for line in text.splitlines() if line.startswith('250 ms'))
+        forecast, hold = float(row[2]), float(row[3])
+        self.assertTrue(40 < forecast < hold < 50, row)
+
     def test_unknown_recording_is_an_error(self):
         status, text = report('check', 'nepostojeca')
         self.assertEqual(status, 1)

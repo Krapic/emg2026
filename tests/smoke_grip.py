@@ -33,10 +33,12 @@ class Fixture(Node):
                     for i in shimmers]
         self.force = self.create_publisher(GripForce, '/grip_force_stream', 1024)
         self.create_subscription(GripForce, '/grip_force_estimated', self.receive, 1024)
+        self.create_subscription(GripForce, '/grip_force_predicted', self.receive_forecast, 1024)
         self.anchor = self.get_clock().now().nanoseconds
         self.start = time.monotonic()
         self.next_index = [0, 0]
         self.estimates = []
+        self.forecasts = []
         self.pause_first = False
         self.create_timer(0.005, self.publish_samples)
 
@@ -72,6 +74,10 @@ class Fixture(Node):
     def receive(self, msg):
         stamp = msg.header.stamp.sec * NS + msg.header.stamp.nanosec
         self.estimates.append((stamp, msg.grip_force, self.get_clock().now().nanoseconds))
+
+    def receive_forecast(self, msg):
+        stamp = msg.header.stamp.sec * NS + msg.header.stamp.nanosec
+        self.forecasts.append((stamp, msg.grip_force, self.get_clock().now().nanoseconds))
 
     def wait(self, condition, seconds):
         deadline = time.monotonic() + seconds
@@ -165,6 +171,18 @@ def run_test(node, directory):
             for stamp, value, _ in node.estimates) / len(node.estimates))
         assert rmse < 15, rmse
         age_ms = sorted((received - stamp) / 1e6 for stamp, _, received in node.estimates)
+        # The forecast runs ahead of the estimate and tracks the sine it extends.
+        assert node.wait(lambda: len(node.forecasts) >= 60, 5), 'Nema prognoza.'
+        forecasts = list(node.forecasts)
+        assert all(b[0] > a[0] for a, b in zip(forecasts, forecasts[1:]))
+        forecast_rmse = math.sqrt(sum(
+            (value - node.force_at((stamp - node.anchor) / NS)) ** 2
+            for stamp, value, _ in forecasts) / len(forecasts))
+        # Holding the estimate over these leads of up to 0.5 s would be off by about 19 N.
+        assert forecast_rmse < 8, forecast_rmse
+        forecast_age_ms = sorted((received - stamp) / 1e6 for stamp, _, received in forecasts)
+        lead_ms = age_ms[len(age_ms) // 2] - forecast_age_ms[len(forecast_age_ms) // 2]
+        assert lead_ms > 100, lead_ms
         bad = directory / 'bad.json'
         bad.write_text('{}')
         cli('estimate', str(bad), success=False)
@@ -179,6 +197,7 @@ def run_test(node, directory):
         assert node.wait(lambda: len(node.estimates) > count, 4), 'Nema oporavka procjena.'
         print(f'Validacija RMSE {model["validation_metrics"]["rmse_n"]:.2f} N, '
               f'uživo RMSE {rmse:.2f} N, medijan starosti {age_ms[len(age_ms) // 2]:.0f} ms. '
+              f'Prognoza RMSE {forecast_rmse:.2f} N, medijan prednosti {lead_ms:.0f} ms. '
               'Provjereni nevaljan model, prekid i povratak senzora.', flush=True)
     finally:
         if launcher.poll() is None:

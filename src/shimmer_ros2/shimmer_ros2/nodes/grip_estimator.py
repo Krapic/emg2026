@@ -1,4 +1,4 @@
-"""Apply a saved grip model to processed EMG streams."""
+"""Apply a saved grip model to processed EMG streams and forecast the estimate."""
 
 from collections import deque
 import json
@@ -12,6 +12,7 @@ from rclpy.node import Node
 from emg_grip_interfaces.msg import Emg, GripForce
 from emg_grip_interfaces.srv import LoadGripModel
 from shimmer_ros2.grip_data import NS, delayed_emg, feature_names, predict
+from shimmer_ros2.grip_forecast import PERIOD_NS, forecast
 
 
 class GripEstimator(Node):
@@ -22,16 +23,25 @@ class GripEstimator(Node):
         self.rate = self.declare_parameter('output_hz', 200.0).value
         self.emg_hz = self.declare_parameter('expected_emg_hz', 992.96969699).value
         gap_ms = self.declare_parameter('max_emg_gap_ms', 20.0).value
+        # How far past the newest estimate the forecast reaches; 0 turns it off.
+        horizon_ms = self.declare_parameter('prediction_horizon_ms', 500.0).value
         if (not self.topics or len(set(self.topics)) != len(self.topics)
                 or not np.isfinite(self.rate) or not 0 < self.rate <= 1000
-                or not np.isfinite(gap_ms) or not 0 < gap_ms <= 1000):
-            raise ValueError('Provjerite topice, frekvenciju i maksimalni EMG razmak.')
+                or not np.isfinite(gap_ms) or not 0 < gap_ms <= 1000
+                or not np.isfinite(horizon_ms) or not 0 <= horizon_ms <= 2000):
+            raise ValueError('Provjerite topice, frekvenciju, maksimalni EMG razmak i horizont.')
+        self.horizon_ns = round(horizon_ms * 1e6)
         self.period_ns = round(NS / self.rate)
         self.gap_ns = round(gap_ms * 1e6)
         self.model = None
+        self.force_range = None
         self.buffers = {topic: deque(maxlen=6000) for topic in self.topics}
         self.last_stamp = 0
+        # Two seconds of estimates: the forecast reads its last second.
+        self.estimates = deque(maxlen=round(2 * self.rate))
+        self.last_target = 0
         self.publisher = self.create_publisher(GripForce, 'grip_force_estimated', 1024)
+        self.forecast_publisher = self.create_publisher(GripForce, 'grip_force_predicted', 1024)
         for topic in self.topics:
             self.create_subscription(Emg, topic, lambda msg, key=topic: self.receive(key, msg),
                                      2048)
@@ -70,12 +80,23 @@ class GripEstimator(Node):
                     for array in (mean, scale, coefficients))
                     or np.any(scale <= 0) or not np.isfinite(intercept)):
                 raise ValueError('Nevaljani parametri regresije.')
+            # Models trained before the forecast existed carry no force range.
+            force_range = data.get('force_range_n')
+            if force_range is not None:
+                if (not isinstance(force_range, list) or len(force_range) != 2
+                        or not all(isinstance(limit, (int, float)) and np.isfinite(limit)
+                                   for limit in force_range)
+                        or force_range[0] >= force_range[1]):
+                    raise ValueError('Nevaljan raspon sile modela.')
+                force_range = tuple(map(float, force_range))
         except (OSError, ValueError, TypeError, KeyError, OverflowError) as error:
             response.message = str(error)
             return response
         self.model = (frames, delays, mean, scale, intercept, coefficients)
+        self.force_range = force_range
         for buffer in self.buffers.values():
             buffer.clear()
+        self.estimates.clear()
         self.last_stamp = self.get_clock().now().nanoseconds
         response.success = True
         response.message = f'Model aktiviran: {path}'
@@ -129,6 +150,41 @@ class GripEstimator(Node):
             msg.header.frame_id = 'grip_estimated'
             msg.grip_force = float(value)
             self.publisher.publish(msg)
+            self.estimates.append((int(stamp), float(value)))
+        self.publish_forecast()
+
+    def publish_forecast(self):
+        """Extend the estimate past its newest sample, up to the horizon.
+
+        Each new batch of estimates refits the forecast and publishes only
+        the targets that no earlier batch covered, so stamps keep increasing.
+        """
+        if not self.horizon_ns or len(self.estimates) < 2:
+            return
+        newest = self.estimates[-1][0]
+        first = max(self.last_target, newest) + PERIOD_NS
+        targets = np.arange(first, newest + self.horizon_ns + 1, PERIOD_NS, dtype=np.int64)
+        if not len(targets):
+            return
+        stamps = np.fromiter((row[0] for row in self.estimates), dtype=np.int64,
+                             count=len(self.estimates))
+        values = np.fromiter((row[1] for row in self.estimates), dtype=float,
+                             count=len(self.estimates))
+        try:
+            forecasts = forecast(stamps, values, targets - newest, self.force_range)
+        except np.linalg.LinAlgError:
+            return
+        if forecasts is None:
+            return
+        self.last_target = int(targets[-1])
+        for stamp, value in zip(targets, forecasts):
+            if not np.isfinite(value) or abs(value) > np.finfo(np.float32).max:
+                continue
+            msg = GripForce()
+            msg.header.stamp.sec, msg.header.stamp.nanosec = divmod(int(stamp), NS)
+            msg.header.frame_id = 'grip_predicted'
+            msg.grip_force = float(value)
+            self.forecast_publisher.publish(msg)
 
 
 def main():

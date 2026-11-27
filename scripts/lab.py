@@ -22,6 +22,7 @@ LAYOUT = ROOT / 'src/godirect_ros2/config/plotjuggler_four_shimmers_config.xml'
 DATA_DIR = ROOT / 'grip_data'
 FORCE_TOPIC = '/grip_force_stream'
 ESTIMATED_FORCE_TOPIC = '/grip_force_estimated'
+PREDICTED_FORCE_TOPIC = '/grip_force_predicted'
 RECORDING_ID = re.compile(r'[0-9a-f]{32}')
 DEFAULT_SHIMMER = 2
 AUTO_SHIMMER_ORDER = (2, 4, 1, 3)
@@ -278,8 +279,9 @@ def make_layout(path, shimmers, estimation_only=False):
     else:
         topics.extend((FORCE_TOPIC, '/grip_force_target'))
         ET.SubElement(plot, 'curve', name='/grip_force_target/grip_force', color='#9467bd')
-    topics.append(ESTIMATED_FORCE_TOPIC)
+    topics.extend((ESTIMATED_FORCE_TOPIC, PREDICTED_FORCE_TOPIC))
     ET.SubElement(plot, 'curve', name=f'{ESTIMATED_FORCE_TOPIC}/grip_force', color='#e6550d')
+    ET.SubElement(plot, 'curve', name=f'{PREDICTED_FORCE_TOPIC}/grip_force', color='#2ca02c')
     splitter.set('count', str(len(splitter)))
     splitter.set('sizes', ';'.join(['1'] * len(splitter)))
     plugin = tree.find("./Plugins/plugin[@ID='ROS2 Topic Subscriber']/selected_topics")

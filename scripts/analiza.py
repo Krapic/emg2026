@@ -5,6 +5,7 @@ Needs only Python and NumPy, so it also runs without ROS and without equipment:
     python scripts/analiza.py                      all recordings and models
     python scripts/analiza.py check P01_ucenje     targets and held force by phase
     python scripts/analiza.py evaluate             newest model on its own recordings
+    python scripts/analiza.py predict              forecast of the estimate against holding it
 """
 
 import argparse
@@ -136,12 +137,43 @@ def evaluate(root, model_name, recording_names):
           'procjene i izmjerene sile; pozitivan znači da model procjenjuje previše.')
 
 
+def predict(root, model_name, recording_names, horizons_ms):
+    path, model = grip_report.find_model(root, model_name)
+    recording_ids = ([grip_report.find_recording(root, name) for name in recording_names]
+                     or model['training_ids'] + model['validation_ids'])
+    print(f'Model {path.stem} ({when(model["created_utc"])} UTC). Prognoza procijenjene sile '
+          'Hankel-DMD-om, uz pogrešku zadržavanja zadnje procjene za usporedbu.')
+    for recording_id in recording_ids:
+        result = grip_report.forecast_report(root, model, recording_id, horizons_ms)
+        print()
+        print(f"{result['session']}: do {result['against_force'][0]['forecasts']} prognoza "
+              'po horizontu, RMSE u N')
+
+        def cells(row):
+            if not row['forecasts']:
+                return ['–', '–', '–']
+            change = row['forecast_rmse_n'] / row['hold_rmse_n'] - 1
+            return [f"{row['forecast_rmse_n']:.2f}", f"{row['hold_rmse_n']:.2f}",
+                    f'{100 * change:+.0f} %']
+
+        show_table(
+            ['HORIZONT', 'PROGNOZA', 'ZADRŽAVANJE', 'RAZLIKA',
+             'PROGNOZA*', 'ZADRŽAVANJE*', 'RAZLIKA*'],
+            [[f"{own['horizon_ms']} ms", *cells(own), *cells(measured)]
+             for own, measured in zip(result['against_estimate'], result['against_force'])])
+        show_warnings(result['session'], grip_report.evaluation_warnings(result))
+    print()
+    print('Stupci bez zvjezdice mjere prognozu prema kasnijoj procjeni, a stupci sa zvjezdicom '
+          'prema izmjerenoj sili, gdje ulazi i pogreška same procjene. Negativna RAZLIKA znači '
+          'da je prognoza bolja od zadržavanja zadnje procjene.')
+
+
 def main(arguments=None):
     parser = argparse.ArgumentParser(
         description='Pregled snimki i modela sile stiska; radi bez ROS-a i opreme.')
     parser.add_argument('--data-dir', type=Path, default=ROOT / 'grip_data',
                         help='Mapa sa snimkama i modelima (zadano grip_data).')
-    actions = parser.add_subparsers(dest='action', metavar='list|check|evaluate')
+    actions = parser.add_subparsers(dest='action', metavar='list|check|evaluate|predict')
     actions.add_parser('list', help='Sve snimke i modeli (zadano).')
     check = actions.add_parser('check', help='Ciljevi i držana sila po fazama snimke.')
     check.add_argument('recording', metavar='SNIMKA', help='Oznaka sesije ili ID snimke.')
@@ -150,13 +182,26 @@ def main(arguments=None):
                        help='Putanja ili ID modela (zadano: najnoviji).')
     model.add_argument('--recordings', nargs='+', default=[], metavar='SNIMKA',
                        help='Snimke za provjeru (zadano: snimke iz modela).')
+    forecast = actions.add_parser(
+        'predict', help='Prognoza procjene u usporedbi sa zadržavanjem zadnje vrijednosti.')
+    forecast.add_argument('model', nargs='?', metavar='MODEL',
+                          help='Putanja ili ID modela (zadano: najnoviji).')
+    forecast.add_argument('--recordings', nargs='+', default=[], metavar='SNIMKA',
+                          help='Snimke za provjeru (zadano: snimke iz modela).')
+    forecast.add_argument('--horizons', nargs='+', type=int, metavar='MS',
+                          default=list(grip_report.HORIZONS_MS),
+                          help='Horizonti prognoze u ms (zadano 100 250 500).')
     args = parser.parse_args(arguments)
+    if args.action == 'predict' and not all(0 < horizon <= 2000 for horizon in args.horizons):
+        parser.error('--horizons moraju biti između 1 i 2000 ms.')
     root = args.data_dir.expanduser().resolve()
     try:
         if args.action == 'check':
             check_recording(root, args.recording)
         elif args.action == 'evaluate':
             evaluate(root, args.model, args.recordings)
+        elif args.action == 'predict':
+            predict(root, args.model, args.recordings, args.horizons)
         else:
             list_everything(root)
     except KeyError as error:

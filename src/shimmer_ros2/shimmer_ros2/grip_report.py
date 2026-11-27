@@ -11,6 +11,7 @@ import numpy as np
 from shimmer_ros2.grip_data import (
     ID_PATTERN, MAX_EMG_GAP_NS, NS, delayed_emg, load_recording, metrics, predict,
 )
+from shimmer_ros2.grip_forecast import HORIZONS_MS, compare
 
 # Force above this share of the reference counts as gripping: halfway between
 # rest and the lowest level of the guided protocol (25 % MVC).
@@ -122,8 +123,12 @@ def recording_warnings(report):
     return []
 
 
-def evaluate_model(root, model, recording_id):
-    """Return a saved model's error on one recording, overall and by force level."""
+def estimate_recording(root, model, recording_id):
+    """Apply a saved model to one recording.
+
+    Returns the metadata, the reference force and, for every row with enough
+    EMG history, the time, the measured force and the estimate.
+    """
     schema, times, emg, force = load_recording(root, recording_id)
     if schema != (model['features'], model['frame_ids'], model['emg_hz']):
         raise ValueError('Model i snimka nemaju iste EMG značajke, uređaje i frekvenciju.')
@@ -132,9 +137,14 @@ def evaluate_model(root, model, recording_id):
     design, valid = delayed_emg(times, [(times, emg)], model['emg_delays_ms'], MAX_EMG_GAP_NS)
     if not valid.any():
         raise ValueError(f'Snimka {recording_id} nema dovoljno neprekinute EMG povijesti.')
-    force = force[valid]
     estimate = predict(design[valid], np.asarray(model['mean']), np.asarray(model['scale']),
                        model['intercept'], np.asarray(model['coefficients']))
+    return metadata, reference, times[valid], force[valid], estimate
+
+
+def evaluate_model(root, model, recording_id):
+    """Return a saved model's error on one recording, overall and by force level."""
+    metadata, reference, _, force, estimate = estimate_recording(root, model, recording_id)
     share = force / reference
     levels = []
     for name, low, high in LEVELS:
@@ -157,3 +167,19 @@ def evaluation_warnings(evaluation):
         return [f"stisak je u samo {100 * evaluation['grip_share']:.0f} % redaka, "
                 'pa pogreška opisuje uglavnom mirovanje']
     return []
+
+
+def forecast_report(root, model, recording_id, horizons_ms=HORIZONS_MS):
+    """Score the forecast of a model's estimate on one recording.
+
+    Each horizon gets two comparisons with holding the last estimate: against
+    the later estimate, which isolates the forecast, and against the measured
+    force, which also carries the error of the estimate itself.
+    """
+    metadata, reference, times, force, estimate = estimate_recording(root, model, recording_id)
+    return {
+        'recording_id': recording_id, 'session': metadata['session'],
+        'grip_share': float(np.mean(force > GRIP_THRESHOLD * reference)),
+        'against_estimate': compare(times, estimate, estimate, horizons_ms),
+        'against_force': compare(times, estimate, force, horizons_ms),
+    }

@@ -162,3 +162,14 @@ def test_newest_model_is_the_default(tmp_path):
     assert grip_report.find_model(tmp_path)[0].stem == 'aa11'
     assert grip_report.find_model(tmp_path, 'bb')[0].stem == 'bb22'
     assert grip_report.find_model(tmp_path, str(tmp_path / 'models/bb22.json'))[0].stem == 'bb22'
+
+
+def test_forecast_of_a_steady_wave_beats_holding_the_estimate(tmp_path):
+    recording_id = save_recording(
+        tmp_path, 'P01_val', lambda seconds: 100 + 80 * np.sin(2 * np.pi * 0.4 * seconds),
+        guided=False)
+    report = grip_report.forecast_report(tmp_path, exact_model(), recording_id, [250, 500])
+    assert report['session'] == 'P01_val' and report['grip_share'] > 0.8
+    for rows in (report['against_estimate'], report['against_force']):
+        assert [row['horizon_ms'] for row in rows] == [250, 500]
+        assert all(row['forecast_rmse_n'] < 0.1 * row['hold_rmse_n'] for row in rows)

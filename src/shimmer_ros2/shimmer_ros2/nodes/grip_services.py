@@ -252,6 +252,8 @@ class GripTrainer(Node):
             'emg_delays_ms': list(EMG_DELAYS_MS),
             'mean': mean.tolist(), 'scale': scale.tolist(), 'intercept': intercept,
             'coefficients': coefficients.tolist(),
+            # The live forecast stays inside the force seen in training.
+            'force_range_n': [float(y.min()), float(y.max())],
             'training_ids': list(request.training_ids), 'validation_ids': list(request.validation_ids),
             'training_rows': len(y), 'validation_rows': 0,
             'training_metrics': metrics(y, predict(x, mean, scale, intercept, coefficients)),
