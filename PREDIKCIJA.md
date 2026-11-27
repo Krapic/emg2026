@@ -49,7 +49,9 @@ Stanje na priloženim snimkama, s referentnim modelom, kao promjena RMSE-a u odn
 
 Prediktor na tim snimkama zasad nije pokazao jasnu korist: razlike su male i nisu dosljedne. Snimke su za tu ocjenu loša podloga, jer sadrže nekoliko naglih slobodnih stisaka i model koji pri stisku griješi 25 N. Na čistom sintetičkom valu, čiji je nastavak poznat, prognoza je točna na stoti dio njutna, pa je sam postupak ispravan.
 
-Glavno ograničenje je osjetljivost na šum. Kad se istom valu amplitude 35 N doda šum od oko 1 N, prednost pred zadržavanjem pada na 8 do 18 %. Prozor od jedne sekunde prekratak je da se iz zašumljene procjene pouzdano odredi kamo signal ide, a dulji prozor na stvarnim snimkama daje lošije rezultate jer stisak nije pravilno titranje.
+Glavno ograničenje je osjetljivost na šum. Kad se istom valu amplitude 35 N doda šum od oko 1 N, prednost pred zadržavanjem pada na 8 do 18 %. To se vidi i uživo: u sintetičkom testu u ROS-u procjena ima RMSE 0,87 N, a prognoza 19,9 N, koliko bi dalo i zadržavanje zadnje procjene (oko 19 N).
+
+Prozor od jedne sekunde prekratak je da se iz zašumljene procjene pouzdano odredi kamo signal ide. Dulji prozor s više odgoda na sintetičkom valu prepolovi pogrešku, ali je na stvarnim snimkama lošiji od zadržavanja, jer stisak nije pravilno titranje. Postavke su zato ostale one koje su bolje na stvarnim snimkama.
 
 ## Razlike prema radu
 
@@ -68,5 +70,6 @@ Rad za predikciju navodi wMAPE 17,92 % prema 5,48 % za estimaciju na 13 ispitani
 ## Što još treba
 
 - Broj odgoda, modova i duljina prozora odabrani su na dvije priložene snimke sa stiskom. Odabir treba ponoviti na snimkama koje prate protokol i potvrditi na snimci koja u odabiru nije sudjelovala.
-- Prognoza uživo provjerena je samo na sintetičkom valu. S opremom je treba pogledati u PlotJuggleru i spremiti u bag snimku zajedno s `/grip_force_estimated`.
+- Prognoza uživo provjerena je samo na sintetičkom valu, gdje stiže ispravnim redom i ispred procjene, ali nije točnija od zadržavanja. S opremom je treba pogledati u PlotJuggleru i spremiti u bag snimku zajedno s `/grip_force_estimated`.
+- Ako ni na novim snimkama ne nadmaši zadržavanje, sljedeći koraci su izglađivanje procjene prije prognoze i odabir modova po rezidualima, kao u radu.
 - Kašnjenje procjene i prognoze pri primitku još nije izmjereno na pravim uređajima.
