@@ -49,7 +49,7 @@ Stanje na priloženim snimkama, s referentnim modelom, kao promjena RMSE-a u odn
 
 Prediktor na tim snimkama zasad nije pokazao jasnu korist: razlike su male i nisu dosljedne. Snimke su za tu ocjenu loša podloga, jer sadrže nekoliko naglih slobodnih stisaka i model koji pri stisku griješi 25 N. Na čistom sintetičkom valu, čiji je nastavak poznat, prognoza je točna na stoti dio njutna, pa je sam postupak ispravan.
 
-Glavno ograničenje je osjetljivost na šum. Kad se istom valu amplitude 35 N doda šum od oko 1 N, prednost pred zadržavanjem pada na 8 do 18 %. To se vidi i uživo: u sintetičkom testu u ROS-u procjena ima RMSE 0,87 N, a prognoza 19,9 N, koliko bi dalo i zadržavanje zadnje procjene (oko 19 N).
+Glavno ograničenje je osjetljivost na šum. Kad se istom valu amplitude 35 N doda šum od oko 1 N, prednost pred zadržavanjem pada na 8 do 18 %. To se vidi i uživo: u sintetičkom testu u ROS-u procjena ima RMSE oko 0,85 N, a prognoza je u dva prolaza imala 13,9 i 19,9 N. Zadržavanje zadnje procjene dalo bi oko 19 N, pa je prognoza u najboljem slučaju nešto bolja, a u najgorem jednaka.
 
 Prozor od jedne sekunde prekratak je da se iz zašumljene procjene pouzdano odredi kamo signal ide. Dulji prozor s više odgoda na sintetičkom valu prepolovi pogrešku, ali je na stvarnim snimkama lošiji od zadržavanja, jer stisak nije pravilno titranje. Postavke su zato ostale one koje su bolje na stvarnim snimkama.
 
