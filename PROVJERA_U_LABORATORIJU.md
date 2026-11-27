@@ -16,7 +16,19 @@ colcon build --symlink-install --cmake-args -DAMENT_CMAKE_SYMLINK_INSTALL=OFF
 ./pokreni.sh self-test
 ```
 
-- [ ] `self-test` završava retkom s RMSE-om validacije i bez greške. Na GitHubu je dao 0,87 N.
+Ako je repozitorij na tom računalu već kloniran, umjesto kloniranja ga ažuriraj i ponovno izgradi. Izgradnja je potrebna nakon svake izmjene čvorova ili launch datoteka.
+
+```bash
+cd emg2026
+git pull
+source /opt/ros/humble/setup.bash
+colcon build --symlink-install --cmake-args -DAMENT_CMAKE_SYMLINK_INSTALL=OFF
+./pokreni.sh self-test
+```
+
+Stara mapa `emg2026` iz ZIP arhive nije klon i `git pull` u njoj ne radi. Preimenuj je i kloniraj repozitorij iznova.
+
+- [ ] `self-test` završava retkom s RMSE-om validacije i prognoze, bez greške. Na GitHubu validacija daje oko 0,86 N.
 
 ## 2. Senzori pojedinačno
 
